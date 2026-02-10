@@ -1,0 +1,30 @@
+@import './variables';
+@import './mixins';
+header{
+    padding: 20px 30px;
+    background-color: $white;
+    border-bottom: 1px solid $light-gray;
+    @include flex-center-justcontent-spacebetween;
+    h1{
+       
+        a{
+             @include flex-center;
+            color:$gray;
+          
+
+            span{font-size: 14px; color:$primary;padding-left: 10px;}
+        }
+    }
+    nav{
+        ul{
+            @include flex-center;
+            gap:20px;
+            li{
+                a{
+                    font-weight: 300;
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+}
