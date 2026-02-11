@@ -2,28 +2,32 @@ import { useSearchParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { TravelContext } from "../App";
 import { fetchPlaceImage } from "../api/unsplashApi";
+import { TripContext } from "../context/TripContext";
 import "../styles/ExploreDetail.scss";
 
 const ExploreDetail = () => {
-  const [id] = useSearchParams();
-  /* const placeId = searchParams.get("pid"); */
+  const { addTrip } = useContext(TripContext);
+  const [searchParams] = useSearchParams();
+  const placeId = searchParams.get("pid");
 
-  const { places } = useContext(TravelContext);
+  const { places, loading: contextLoading } = useContext(TravelContext);
 
   const [place, setPlace] = useState(null);
   const [image, setImage] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // place 찾기
   useEffect(() => {
-    if (!id || places.length === 0) return;
+    if (!placeId || places.length === 0) return;
 
     const found = places.find(
-      (item) => item.properties.place_id === id
+      (item) => String(item.properties.place_id) === placeId
     );
 
     setPlace(found);
-  }, [id, places]);
+  }, [placeId, places]);
 
+  // 이미지 가져오기
   useEffect(() => {
     if (!place?.properties?.name) return;
 
@@ -36,8 +40,10 @@ const ExploreDetail = () => {
     loadImage();
   }, [place]);
 
+  // 🔵 로딩 먼저 체크
+  if (contextLoading || loading) return <p>로딩중...</p>;
+
   if (!place) return <p>여행지 정보를 찾을 수 없습니다.</p>;
-  if (loading) return <p>로딩중...</p>;
 
   const {
     name,
@@ -48,22 +54,25 @@ const ExploreDetail = () => {
     address_line2,
     country,
     city,
-  } = place.properties;
+  } = place.properties; //객체 구조분해할당
 
   return (
     <div className="explore-detail">
-      <img src={image} alt={name} />
+      <img src={image || "/img/no-image.jpg"} alt={name} />
 
       <h1>{name}</h1>
 
       <ul className="info">
-        {categories && (
+        {Array.isArray(categories) && (
           <li>
             <strong>카테고리</strong>
-            <span>{categories.replaceAll(".", " · ")}</span>
+            <span>
+              {categories
+                .map((c) => c.replaceAll(".", " · "))
+                .join(", ")}
+            </span>
           </li>
         )}
-
         {district && (
           <li>
             <strong>지역</strong>
@@ -98,6 +107,16 @@ const ExploreDetail = () => {
           </li>
         )}
       </ul>
+      <button className="btn"
+          onClick={() =>
+              addTrip({
+              name: place.properties.name,
+              country: place.properties.country,
+              status: "planned",
+              createdAt: new Date()
+              })
+          }
+      >❤️ 찜하기</button>
     </div>
   );
 };

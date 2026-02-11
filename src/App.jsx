@@ -1,4 +1,6 @@
 import { createContext, useEffect, useState } from "react";
+import AuthProvider from "./context/AuthContext";
+import TripProvider from "./context/TripContext";
 import { getTravelSpots } from "./api/travelApi";
 import {Routes, Route} from 'react-router-dom'
 import Home from './pages/Home.jsx'
@@ -8,6 +10,7 @@ import Profile from './pages/Profile.jsx'
 import Community from './pages/Community.jsx'
 import Header from './components/Header.jsx'
 import Footer from './components/Footer.jsx'
+import Login from "./pages/Login.jsx";
 import ExploreDetail from './components/ExploreDetail.jsx'
 
 import './App.scss'
@@ -35,18 +38,23 @@ function App() {
 
 
   return (
-    <TravelContext.Provider value={{ places, loading }}>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/explore/detail/:id" element={<ExploreDetail />} />
-        <Route path="/mytrip" element={<Mytrip />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/profile" element={<Profile />} />
-      </Routes>
-      <Footer />
-    </TravelContext.Provider>
+    <AuthProvider>
+      <TripProvider>
+        <TravelContext.Provider value={{ places, loading }}>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/explore/detail" element={<ExploreDetail />} />
+            <Route path="/mytrip" element={<Mytrip />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/login" element={<Login />} />
+          </Routes>
+          <Footer />
+        </TravelContext.Provider>
+      </TripProvider>
+    </AuthProvider>
   )
 }
 

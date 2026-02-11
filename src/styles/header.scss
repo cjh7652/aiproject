@@ -27,4 +27,27 @@ header{
             }
         }
     }
+    .loginWrap{
+        position: absolute;
+        right: 30px;
+        top: 10px;
+        font-size: 12px;
+        a{
+            margin-left: 15px;
+            color:$gray;
+        }
+        .logoutBtn{
+            background: none;
+            border:none;
+            color: $primary;
+
+             border-radius: 4px;
+             position: relative;
+        }
+        .in{
+            display: flex;
+            align-items: center;
+             gap: 10px;
+        }
+    }
 }

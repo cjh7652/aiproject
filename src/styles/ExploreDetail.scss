@@ -19,3 +19,13 @@
     line-height: 1.6;
   }
 }
+.info{
+  li{
+    line-height: 150%;
+    strong{
+    display: inline-block;
+    width: 80px;
+    font-weight: 600;
+  }
+  }
+}

@@ -72,7 +72,7 @@ const Home = () => {
 
           return (
             <li key={item.properties.place_id} className="place-card">
-             <Link to={`/explore/detail?${item.properties.place_id}`}>
+             <Link to={`/explore/detail?pid=${item.properties.place_id}`}>
              	 <img
 	                src={images[name] || "/img/no-image.jpg"}
 	                alt={name}
