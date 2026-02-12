@@ -1,22 +1,30 @@
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { TravelContext } from "../App";
 import { fetchPlaceImage } from "../api/unsplashApi";
-import { TripContext } from "../context/TripContext";
+import { auth } from "../firebase";
+import { db } from "../firebase";
+import {
+  doc,
+  setDoc,
+  deleteDoc,
+  onSnapshot,
+} from "firebase/firestore";
 import "../styles/ExploreDetail.scss";
 
 const ExploreDetail = () => {
-  const { addTrip } = useContext(TripContext);
-  const [searchParams] = useSearchParams();
-  const placeId = searchParams.get("pid");
-
   const { places, loading: contextLoading } = useContext(TravelContext);
+
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const placeId = searchParams.get("pid");
 
   const [place, setPlace] = useState(null);
   const [image, setImage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
 
-  // place 찾기
+  // 🔵 place 찾기
   useEffect(() => {
     if (!placeId || places.length === 0) return;
 
@@ -27,12 +35,13 @@ const ExploreDetail = () => {
     setPlace(found);
   }, [placeId, places]);
 
-  // 이미지 가져오기
+  // 🔵 이미지 가져오기
   useEffect(() => {
     if (!place?.properties?.name) return;
 
     const loadImage = async () => {
-      const img = await fetchPlaceImage(place.properties.name);
+      const query = `${place.properties.name} ${place.properties.country}`;
+      const img = await fetchPlaceImage(query);
       setImage(img);
       setLoading(false);
     };
@@ -40,9 +49,21 @@ const ExploreDetail = () => {
     loadImage();
   }, [place]);
 
-  // 🔵 로딩 먼저 체크
-  if (contextLoading || loading) return <p>로딩중...</p>;
+  // 🔥 이미 찜했는지 실시간 체크
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user || !placeId) return;
 
+    const tripRef = doc(db, "users", user.uid, "trips", placeId);
+
+    const unsubscribe = onSnapshot(tripRef, (docSnap) => {
+      setIsLiked(docSnap.exists());
+    });
+
+    return () => unsubscribe();
+  }, [placeId]);
+
+  if (contextLoading || loading) return <p>로딩중...</p>;
   if (!place) return <p>여행지 정보를 찾을 수 없습니다.</p>;
 
   const {
@@ -54,11 +75,52 @@ const ExploreDetail = () => {
     address_line2,
     country,
     city,
-  } = place.properties; //객체 구조분해할당
+  } = place.properties;
+
+  // 🔥 찜하기
+  const handleLike = async () => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert("회원가입 후 이용해주세요 😊");
+      navigate("/signup");
+      return;
+    }
+
+    try {
+      await setDoc(
+        doc(db, "users", user.uid, "trips", placeId),
+        {
+          name,
+          country,
+          city,
+          image,
+          status: "planned",
+          createdAt: new Date(),
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // 🔥 찜 취소
+  const handleUnlike = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      await deleteDoc(
+        doc(db, "users", user.uid, "trips", placeId)
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="explore-detail">
-      <img src={image || "/img/no-image.jpg"} alt={name} />
+      <img src={image} alt={name} />
 
       <h1>{name}</h1>
 
@@ -73,6 +135,7 @@ const ExploreDetail = () => {
             </span>
           </li>
         )}
+
         {district && (
           <li>
             <strong>지역</strong>
@@ -107,16 +170,17 @@ const ExploreDetail = () => {
           </li>
         )}
       </ul>
-      <button className="btn"
-          onClick={() =>
-              addTrip({
-              name: place.properties.name,
-              country: place.properties.country,
-              status: "planned",
-              createdAt: new Date()
-              })
-          }
-      >❤️ 찜하기</button>
+
+      {/* 🔥 버튼 분기 */}
+      {isLiked ? (
+        <button className="likebtn liked" onClick={handleUnlike}>
+          💔 찜 취소
+        </button>
+      ) : (
+        <button className="likebtn" onClick={handleLike}>
+          ❤️ 찜하기
+        </button>
+      )}
     </div>
   );
 };

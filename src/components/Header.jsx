@@ -58,7 +58,7 @@ const Header = () => {
             <div className="loginWrap">
                 {user ? (
                     <div className='in'>
-                        <p>{user.displayName}님 환영합니다</p>
+                        <p>{user.displayName || user.email}님 환영합니다</p>
                         <button onClick={handleLogout} className="logoutBtn">
                             로그아웃
                         </button>

@@ -11,6 +11,7 @@ import Community from './pages/Community.jsx'
 import Header from './components/Header.jsx'
 import Footer from './components/Footer.jsx'
 import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
 import ExploreDetail from './components/ExploreDetail.jsx'
 
 import './App.scss'
@@ -50,6 +51,7 @@ function App() {
             <Route path="/community" element={<Community />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
           </Routes>
           <Footer />
         </TravelContext.Provider>

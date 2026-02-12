@@ -14,15 +14,20 @@ const MyTrip = () => {
       <h1>My Trip</h1>
 
      
-        <div className="trip-list">
-           {trips.map(trip => (
-                <div key={trip.id}>
+        <ul className="trip-list">
+          {trips.map(trip => (
+            <li key={trip.id} className="trip-item">
+              <img
+                src={trip.image || "/img/no-image.jpg"}
+                alt={trip.name}
+              />
+              <div>
                 <h3>{trip.name}</h3>
                 <p>{trip.country}</p>
-                <button onClick={() => deleteTrip(trip.id)}>삭제</button>
-                </div>
-            ))}
-        </div>
+              </div>
+            </li>
+          ))}
+        </ul>
 
     </div>
   );
