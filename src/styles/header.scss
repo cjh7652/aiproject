@@ -1,5 +1,6 @@
-@import './variables';
-@import './mixins';
+@use './variables' as *;
+@use './mixins' as *;
+
 header{
     padding: 20px 30px;
     background-color: $white;
